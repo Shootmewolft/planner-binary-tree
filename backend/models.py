@@ -1,8 +1,21 @@
 from datetime import datetime
 
 class SubTarea:
-    def __init__(self, id_tarea, nombre, fecha_vencimiento, prioridad, etiquetas=None, notas=""):
-        self.id_tarea = id_tarea
+    _id_counter = 1  # Contador estático para generar IDs únicos
+    _id_usados = set()  # Conjunto de IDs ya utilizados
+
+    def __init__(self, nombre, fecha_vencimiento, prioridad, etiquetas=None, notas="", id_tarea=None):
+        # Si no se proporciona un id_tarea, se asigna uno nuevo
+        if id_tarea is None:
+            self.id_tarea = SubTarea._id_counter
+            SubTarea._id_counter += 1  # Incrementar el contador para el siguiente id
+        else:
+            if id_tarea in SubTarea._id_usados:
+                raise ValueError(f"El ID {id_tarea} ya está en uso.")
+            self.id_tarea = id_tarea
+            SubTarea._id_usados.add(id_tarea)  # Agregar el ID al conjunto de IDs utilizados
+        
+        # Resto de los atributos de la subtarea
         self.nombre = nombre
         self.fecha_vencimiento = fecha_vencimiento
         self.prioridad = prioridad
@@ -10,6 +23,10 @@ class SubTarea:
         self.notas = notas
         self.subtareas_izquierda = None
         self.subtareas_derecha = None
+
+    def __del__(self):
+        # Eliminar el ID cuando se destruye la instancia
+        SubTarea._id_usados.remove(self.id_tarea)
 
     def agregar_subtarea(self, subtarea, lado):
         if self.subtareas_izquierda is None:
@@ -67,7 +84,7 @@ class SubTarea:
 
 class Proyecto(SubTarea):
     def __init__(self, nombre):
-        super().__init__(id_tarea=None, nombre=nombre, fecha_vencimiento=None, prioridad=None)
+        super().__init__(nombre=nombre, fecha_vencimiento=None, prioridad=None)
         self.tareas = []
 
     def agregar_subtarea(self, subtarea, lado=None):
@@ -110,6 +127,9 @@ class Proyecto(SubTarea):
 
     def __repr__(self):
         return f"Proyecto: {self.nombre}, Total Subtareas: {len(self.tareas)}"
+
+
+
 
 # # USO DE LA CLASES
 # proyecto = Proyecto("Proyecto de Ejemplo")
