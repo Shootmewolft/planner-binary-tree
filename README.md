@@ -40,7 +40,18 @@ Esta es una API en Flask para la gestión de subtareas dentro de un proyecto. La
 
 ---
 
-### 3. **Buscar Subtareas por Etiqueta**
+### 3. **Eliminar toda la Información del Árbol de Subtareas**
+- **Método:** `DELETE`
+- **Ruta:** `/subtareas/eliminar`
+- **Descripción:** Este endpoint elimina toda la información del árbol de subtareas del proyecto, borrando todas las tareas y subtareas asociadas.
+
+#### Respuesta:
+- **Código 200**: Todas las subtareas fueron eliminadas con éxito.
+- **Código 500**: Error interno del servidor.
+
+---
+
+### 4. **Buscar Subtareas por Etiqueta**
 - **Método:** `POST`
 - **Ruta:** `/buscar`
 - **Descripción:** Permite buscar subtareas por una etiqueta específica.
@@ -56,7 +67,7 @@ Esta es una API en Flask para la gestión de subtareas dentro de un proyecto. La
 
 ---
 
-### 4. **Mostrar Proyecto**
+### 5. **Mostrar Proyecto**
 - **Método:** `GET`
 - **Ruta:** `/proyecto`
 - **Descripción:** Muestra los detalles del proyecto.
@@ -68,7 +79,7 @@ Esta es una API en Flask para la gestión de subtareas dentro de un proyecto. La
 
 ---
 
-### 5. **Obtener todas las Subtareas**
+### 6. **Obtener todas las Subtareas**
 - **Método:** `GET`
 - **Ruta:** `/subtareas`
 - **Descripción:** Devuelve una lista de todas las subtareas en el proyecto.
@@ -103,6 +114,24 @@ Esta es una API en Flask para la gestión de subtareas dentro de un proyecto. La
 {
   "message": "Subtarea agregada con éxito",
   "id_tarea": 1
+}
+```
+
+---
+
+### Eliminar Todas las Subtareas:
+
+**Solicitud (DELETE /eliminar_todas_las_subtareas):**
+
+```json
+{}
+```
+
+**Respuesta (200):**
+
+```json
+{
+  "message": "Todas las subtareas fueron eliminadas con éxito."
 }
 ```
 
