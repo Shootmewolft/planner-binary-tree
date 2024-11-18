@@ -75,6 +75,18 @@ def eliminar_subtarea(id_tarea):
         # Manejo de errores generales
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
+@app.route('/subtareas/eliminar', methods=['DELETE'])
+def eliminar_todo():
+    try:
+        # Llamar al método para eliminar todas las subtareas
+        mensaje = proyecto.eliminar_todas_subtareas()
+
+        return jsonify({"message": mensaje}), 200
+    
+    except Exception as e:
+        # Manejo de errores generales
+        return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
+
 
 @app.route('/buscar', methods=['POST'])
 def buscar_subtareas_por_etiqueta():

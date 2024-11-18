@@ -107,6 +107,13 @@ class Proyecto(SubTarea):
                 super().eliminar_subtarea(id_tarea)
                 return f"Subtarea con ID {id_tarea} eliminada exitosamente."
         return f"No se encontró una subtarea con ID {id_tarea}."
+    
+    def eliminar_todas_subtareas(self):
+        """
+        Elimina todas las subtareas del proyecto.
+        """
+        self.tareas.clear()  # Elimina todas las subtareas del proyecto
+        return "Todas las subtareas han sido eliminadas."
 
     def buscar_subtareas_por_etiqueta(self, etiqueta):
         """
