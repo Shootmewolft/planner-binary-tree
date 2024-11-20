@@ -1,11 +1,103 @@
 from datetime import datetime
 
+
+
+class Tarea:
+    __id__counter = 1
+    def __init__(self, nombre, descripcion):
+        self.id_tarea = Tarea.__id__counter
+        Tarea.__id__counter += 1
+        self.nombre = nombre
+        self.descripcion = descripcion
+        self.subtareas_izquierda = []  # Lista de subtareas del lado izquierdo
+        self.subtareas_derecha = []  # Lista de subtareas del lado derecho
+
+    def agregar_subtarea(self, nombre, descripcion, lado):
+        """
+        Agrega una subtarea a la tarea actual según el lado especificado.
+        """
+        if lado not in ["izquierdo", "derecho"]:
+            raise ValueError("El lado debe ser 'izquierdo' o 'derecho'.")
+
+        subtarea = Tarea(nombre, descripcion)
+
+        if lado == "izquierdo":
+            self.subtareas_izquierda.append(subtarea)
+        else:  # lado == "derecho"
+            self.subtareas_derecha.append(subtarea)
+
+    def eliminar_subtarea(self, id_subtarea):
+        """
+        Elimina una subtarea de la tarea si el id coincide.
+        """
+        # Eliminar de la lista de subtareas del lado izquierdo
+        self.subtareas_izquierda = [subtarea for subtarea in self.subtareas_izquierda if subtarea.id_tarea != id_subtarea]
+        # Eliminar de la lista de subtareas del lado derecho
+        self.subtareas_derecha = [subtarea for subtarea in self.subtareas_derecha if subtarea.id_tarea != id_subtarea]
+        return f"Subtarea con ID {id_subtarea} eliminada exitosamente."
+
+    def eliminar_tarea(self, id_tarea):
+        """
+        Elimina la tarea principal y sus subtareas.
+        """
+        if self.id_tarea == id_tarea:
+            # Eliminar todas las subtareas asociadas
+            self.subtareas_izquierda.clear()
+            self.subtareas_derecha.clear()
+            return f"Tarea con ID {id_tarea} y sus subtareas eliminadas exitosamente."
+        return None
+
+    def to_dict(self):
+        """
+        Convierte la tarea a un diccionario, incluyendo subtareas organizadas por lados.
+        """
+        return {
+            "id_tarea": self.id_tarea,
+            "nombre": self.nombre,
+            "descripcion": self.descripcion,
+            "subtareas_izquierda": [subtarea.to_dict() for subtarea in self.subtareas_izquierda],
+            "subtareas_derecha": [subtarea.to_dict() for subtarea in self.subtareas_derecha],
+        }
+
+# Lista global para almacenar las tareas principales
+tareas = []
+
+def agregar_tarea(nombre, descripcion):
+    """Agrega una nueva tarea principal."""
+    if len(tareas) >= 2:
+        raise ValueError("Solo se pueden agregar dos tareas.")
+
+    if not nombre:
+        raise ValueError("El campo 'nombre' es obligatorio.")
+
+    if not descripcion:
+        raise ValueError("El campo 'descripcion' es obligatorio.")
+
+    tarea = Tarea(nombre=nombre, descripcion=descripcion)
+    tareas.append(tarea)
+    return tarea
+
+def eliminar_tarea(id_tarea):
+    """Elimina una tarea y todas sus subtareas asociadas."""
+    for tarea in tareas:
+        mensaje = tarea.eliminar_tarea(id_tarea)
+        if mensaje:
+            tareas.remove(tarea)  # Elimina la tarea principal de la lista de tareas
+            return mensaje
+    return f"No se encontró una tarea con ID {id_tarea}."
+
+
+def obtener_todas_las_tareas():
+    """Devuelve una lista de todas las tareas y sus subtareas."""
+    return [tarea.to_dict() for tarea in tareas]
+
+
+
 class SubTarea:
     _id_counter = 1  # Contador estático para generar IDs únicos
     _id_usados = set()  # Conjunto de IDs ya utilizados
 
     def __init__(self, nombre, fecha_vencimiento, prioridad, etiquetas=None, notas="", id_tarea=None):
-        # Si no se proporciona un id_tarea, se asigna uno nuevo
         if id_tarea is None:
             self.id_tarea = SubTarea._id_counter
             SubTarea._id_counter += 1  # Incrementar el contador para el siguiente id
@@ -24,19 +116,17 @@ class SubTarea:
         self.subtareas_izquierda = None
         self.subtareas_derecha = None
 
-    def __del__(self):
-        # Eliminar el ID cuando se destruye la instancia
-        SubTarea._id_usados.remove(self.id_tarea)
-
     def agregar_subtarea(self, subtarea, lado):
-        if self.subtareas_izquierda is None:
-            self.subtareas_izquierda = subtarea
-        elif self.subtareas_derecha is None:
-            self.subtareas_derecha = subtarea
-        elif lado == "izquierda":
-            self.subtareas_izquierda.agregar_subtarea(subtarea, lado)
-        elif lado == "derecha":
-            self.subtareas_derecha.agregar_subtarea(subtarea, lado)
+        if lado == "izquierdo":
+            if self.subtareas_izquierda is None:
+                self.subtareas_izquierda = subtarea
+            else:
+                self.subtareas_izquierda.agregar_subtarea(subtarea, lado)
+        elif lado == "derecho":
+            if self.subtareas_derecha is None:
+                self.subtareas_derecha = subtarea
+            else:
+                self.subtareas_derecha.agregar_subtarea(subtarea, lado)
 
     def eliminar_subtarea(self, id_tarea):
         if self.subtareas_izquierda and self.subtareas_izquierda.id_tarea == id_tarea:
@@ -48,6 +138,7 @@ class SubTarea:
                 self.subtareas_izquierda.eliminar_subtarea(id_tarea)
             if self.subtareas_derecha:
                 self.subtareas_derecha.eliminar_subtarea(id_tarea)
+
 
     def buscar_subtareas_por_etiqueta(self, etiqueta, resultados=None):
         if resultados is None:
@@ -86,27 +177,80 @@ class Proyecto(SubTarea):
     def __init__(self, nombre):
         super().__init__(nombre=nombre, fecha_vencimiento=None, prioridad=None)
         self.tareas = []
+    
+    def agregar_tarea(self, nombre, descripcion):
+        """
+        Agrega una nueva tarea principal al proyecto. Solo permite hasta 2 tareas.
+        """
+        if len(self.tareas) >= 2:
+            raise ValueError("Solo se pueden agregar dos tareas principales.")
 
-    def agregar_subtarea(self, subtarea, lado=None):
-        """
-        Agrega una subtarea (como instancia de `SubTarea`) al proyecto.
-        """
-        if not isinstance(subtarea, SubTarea):
-            raise TypeError("La subtarea debe ser una instancia de SubTarea.")
-        self.tareas.append(subtarea)
-        super().agregar_subtarea(subtarea, lado)
-        print(self.tareas)
+        tarea = Tarea(nombre, descripcion)
+        self.tareas.append(tarea)    
 
-    def eliminar_subtarea(self, id_tarea):
+    def agregar_subtarea(self, subtarea, lado):
         """
-        Elimina una subtarea del proyecto por su ID.
+        Agrega una subtarea al proyecto según el lado especificado.
         """
-        for subtarea in self.tareas:
-            if subtarea.id_tarea == id_tarea:
-                self.tareas.remove(subtarea)
-                super().eliminar_subtarea(id_tarea)
-                return f"Subtarea con ID {id_tarea} eliminada exitosamente."
+        if not self.tareas:
+            raise ValueError("No hay tareas principales en el proyecto.")
+        
+        # Asignar al primer o segundo nodo según el lado
+        if lado == "izquierdo":
+            self.tareas[0].agregar_subtarea(
+                subtarea.nombre, subtarea.descripcion, lado="izquierdo"
+            )
+        elif lado == "derecho":
+            if len(self.tareas) < 2:
+                raise ValueError("Debe haber dos tareas principales para asignar al lado derecho.")
+            self.tareas[1].agregar_subtarea(
+                subtarea.nombre, subtarea.descripcion, lado="derecho"
+            )
+        else:
+            raise ValueError("El lado debe ser 'izquierdo' o 'derecho'.")
+    
+    def eliminar_tarea(self, id_tarea):
+        # Buscar tarea por ID
+        tarea_a_eliminar = None
+        for tarea in self.tareas:
+            if tarea.id_tarea == id_tarea:
+                tarea_a_eliminar = tarea
+                break
+            
+        if not tarea_a_eliminar:
+            return f"No se encontró una tarea con ID {id_tarea}."
+    
+        # Eliminar subtareas de esa tarea
+        for subtarea in tarea_a_eliminar.subtareas_izquierda:
+            self.eliminar_subtarea(subtarea.id_tarea)
+        for subtarea in tarea_a_eliminar.subtareas_derecha:
+            self.eliminar_subtarea(subtarea.id_tarea)
+    
+        # Eliminar la tarea principal
+        self.tareas.remove(tarea_a_eliminar)
+        return f"Tarea con ID {id_tarea} y todas sus subtareas han sido eliminadas."
+        
+
+
+    def eliminar_subtarea(id_tarea):
+        """Elimina una subtarea de cualquier tarea a la que pertenezca."""
+        for tarea in tareas:
+            # Buscar y eliminar en subtareas_izquierda
+            for subtarea in tarea.subtareas_izquierda:
+                if subtarea.id_tarea == id_tarea:
+                    tarea.subtareas_izquierda.remove(subtarea)
+                    return f"Subtarea con ID {id_tarea} eliminada exitosamente."
+    
+            # Buscar y eliminar en subtareas_derecha
+            for subtarea in tarea.subtareas_derecha:
+                if subtarea.id_tarea == id_tarea:
+                    tarea.subtareas_derecha.remove(subtarea)
+                    return f"Subtarea con ID {id_tarea} eliminada exitosamente."
+    
         return f"No se encontró una subtarea con ID {id_tarea}."
+    
+
+
     
     def eliminar_todas_subtareas(self):
         """
@@ -134,54 +278,3 @@ class Proyecto(SubTarea):
 
     def __repr__(self):
         return f"Proyecto: {self.nombre}, Total Subtareas: {len(self.tareas)}"
-
-
-
-
-# # USO DE LA CLASES
-# proyecto = Proyecto("Proyecto de Ejemplo")
-# subtarea1 = SubTarea(
-#     id_tarea=1,
-#     nombre="Primera Subtarea",
-#     fecha_vencimiento=datetime(2024, 12, 1),
-#     prioridad="Alta",
-#     etiquetas=["importante", "urgente"]
-# )
-# subtarea2 = SubTarea(
-#     id_tarea=2,
-#     nombre="Segunda Subtarea",
-#     fecha_vencimiento=datetime(2024, 12, 10),
-#     prioridad="Media",
-#     etiquetas=["urgente"]
-# )
-# subtarea3 = SubTarea(
-#     id_tarea=3,
-#     nombre="Tercera Subtarea",
-#     fecha_vencimiento=datetime(2024, 12, 15),
-#     prioridad="Baja",
-#     etiquetas=["asd"]
-# )
-# subtarea4 = SubTarea(
-#     id_tarea=4,
-#     nombre="Cuarta Subtarea",
-#     fecha_vencimiento=datetime(2024, 12, 12),
-#     prioridad="Alta",
-#     etiquetas=["CSS"]
-# )
-
-# proyecto.agregar_subtarea(subtarea1, lado="izquierda")
-# proyecto.agregar_subtarea(subtarea2, lado="derecha")
-# proyecto.agregar_subtarea(subtarea3, lado="izquierda")
-
-# print("Buscar subtareas por etiqueta 'urgente':")
-# print(proyecto.buscar_subtareas_por_etiqueta("urgente"))
-# print("\nEliminar subtarea con ID 2:")
-# print(proyecto.eliminar_subtarea(2))
-
-# print("\nEstado del proyecto:")
-# print(proyecto)
-# for tarea in proyecto.tareas:
-#     print(tarea)
-
-# print("Arbol completo del proyecto:")
-# proyecto.mostrar_arbol_completo()

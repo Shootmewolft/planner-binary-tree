@@ -1,91 +1,130 @@
 from flask import Flask, request, jsonify
-from models import Proyecto, SubTarea
+from models import Proyecto, SubTarea, agregar_tarea, tareas, obtener_todas_las_tareas, eliminar_tarea
 from datetime import datetime
 
 app = Flask(__name__)
 
-proyecto = Proyecto(nombre="Shoot")
+proyecto = Proyecto(nombre="Shoot") 
 
-@app.route('/subtarea', methods=['POST'])
-def agregar_subtarea():
+@app.route('/tarea', methods=['POST'])
+def agregar_tarea_endpoint():
     try:
-        # Verificar que los datos necesarios estén presentes
+        if len(tareas) >= 2:
+            return jsonify({"error": "Solo se pueden agregar dos tareas."}), 400
+
         data = request.json
         if not data:
             return jsonify({"error": "No se ha recibido un cuerpo de solicitud."}), 400
 
         nombre = data.get('nombre')
+        descripcion = data.get('descripcion')
+
+        nueva_tarea = agregar_tarea(nombre, descripcion)
+        return jsonify({
+            "mensaje": "Tarea agregada exitosamente.",
+            "tarea": nueva_tarea.to_dict()
+        }), 201
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": "Ha ocurrido un error interno."}), 500
+
+@app.route('/tareas', methods=['GET'])
+def obtener_tareas():
+    try:
+        todas_las_tareas = obtener_todas_las_tareas()
+        return jsonify({
+            "tareas": todas_las_tareas
+        }), 200
+    except Exception as e:
+        return jsonify({"error": "Ha ocurrido un error interno."}), 500
+
+@app.route('/tarea/<int:id_tarea>', methods=['DELETE'])
+def eliminar_tarea_endpoint(id_tarea):
+    try:
+        # Llamada a la función global para eliminar tarea
+        mensaje = eliminar_tarea(id_tarea)
+        if "no se encontró" in mensaje.lower():
+            return jsonify({"error": mensaje}), 404  # Si no se encontró la tarea
+        return jsonify({"message": mensaje}), 200  # Mensaje de éxito
+    except Exception as e:
+        return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
+
+
+
+@app.route('/subtarea', methods=['POST'])
+def agregar_subtarea():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "No se ha recibido un cuerpo de solicitud."}), 400
+
+        # Campos obligatorios
+        nombre = data.get('nombre')
         prioridad = data.get('prioridad')
+        lado = data.get('lado')  # Nuevo campo para especificar el lado
 
-        if not nombre:
-            return jsonify({"error": "El campo 'nombre' es obligatorio."}), 400
+        if not nombre or not prioridad:
+            return jsonify({"error": "Los campos 'nombre' y 'prioridad' son obligatorios."}), 400
 
-        if not prioridad:
-            return jsonify({"error": "El campo 'prioridad' es obligatorio."}), 400
+        if not lado:
+            return jsonify({"error": "El campo 'lado' es obligatorio (izquierdo o derecho)."}), 400
 
-        # Validación de fecha_vencimiento (si es proporcionada)
+        # Validar el valor del lado
+        if lado not in ['izquierdo', 'derecho']:
+            return jsonify({"error": "El campo 'lado' debe ser 'izquierdo' o 'derecho'."}), 400
+
+        # Seleccionar tarea según el lado
+        if lado == 'izquierdo':
+            if len(tareas) == 0:
+                return jsonify({"error": "No hay tareas principales para asignar subtareas."}), 400
+            tarea_principal = tareas[0]
+        elif lado == 'derecho':
+            if len(tareas) < 2:
+                return jsonify({"error": "No hay suficientes tareas principales para asignar al lado derecho."}), 400
+            tarea_principal = tareas[1]
+
+        # Validación opcional de fecha de vencimiento
         fecha_vencimiento = data.get('fecha_vencimiento')
         if fecha_vencimiento:
             try:
                 fecha_vencimiento = datetime.fromisoformat(fecha_vencimiento)
             except ValueError:
-                return jsonify({"error": "El campo 'fecha_vencimiento' debe tener un formato de fecha válido."}), 400
+                return jsonify({"error": "El campo 'fecha_vencimiento' debe tener un formato válido."}), 400
 
-        # Obtener el id_tarea desde la solicitud, si se proporciona
-        id_tarea = data.get('id_tarea')
+        # Crear la subtarea
+        subtarea = SubTarea(
+            nombre=nombre,
+            fecha_vencimiento=fecha_vencimiento,
+            prioridad=prioridad,
+            etiquetas=data.get('etiquetas', []),
+            notas=data.get('notas', "")
+        )
 
-        # Crear la subtarea (el id_tarea se asigna automáticamente si no se proporciona)
-        try:
-            subtarea = SubTarea(
-                nombre=nombre,
-                fecha_vencimiento=fecha_vencimiento,
-                prioridad=prioridad,
-                etiquetas=data.get('etiquetas', []),
-                notas=data.get('notas', ""),
-                id_tarea=id_tarea
-            )
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400  # Devolver error si el ID ya está en uso
-
-        # Intentar agregar la subtarea al proyecto
-        lado = data.get('lado')
-        proyecto.agregar_subtarea(subtarea, lado=lado)
+        # Agregar la subtarea al lado correspondiente
+        tarea_principal.agregar_subtarea(subtarea.nombre, subtarea.notas, lado=lado)
 
         return jsonify({"message": "Subtarea agregada con éxito", "id_tarea": subtarea.id_tarea}), 201
 
-    except KeyError as e:
-        return jsonify({"error": f"Falta el campo obligatorio: {str(e)}"}), 400
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
-
-
-@app.route('/subtarea/<int:id_tarea>', methods=['DELETE'])
-def eliminar_subtarea(id_tarea):
+    
+@app.route('/subtarea/<int:id_subtarea>', methods=['DELETE'])
+def eliminar_subtarea_endpoint(id_subtarea):
     try:
-        # Intentar eliminar la subtarea
-        mensaje = proyecto.eliminar_subtarea(id_tarea)
+        # Buscar en las tareas principales
+        for tarea in tareas:
+            # Llamar a la función eliminar_subtarea de la tarea correspondiente
+            mensaje = tarea.eliminar_subtarea(id_subtarea)
+            if "eliminada exitosamente" in mensaje:
+                return jsonify({"message": mensaje}), 200
         
-        # Si no se encuentra la subtarea
-        if "No se encontró una subtarea con ID" in mensaje:
-            return jsonify({"error": mensaje}), 404
+        return jsonify({"error": f"No se encontró una subtarea con ID {id_subtarea}."}), 404
 
-        return jsonify({"message": mensaje}), 200
-    
     except Exception as e:
-        # Manejo de errores generales
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
-@app.route('/subtareas/eliminar', methods=['DELETE'])
-def eliminar_todo():
-    try:
-        # Llamar al método para eliminar todas las subtareas
-        mensaje = proyecto.eliminar_todas_subtareas()
-
-        return jsonify({"message": mensaje}), 200
-    
-    except Exception as e:
-        # Manejo de errores generales
-        return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
 
 @app.route('/buscar', methods=['POST'])
@@ -113,52 +152,6 @@ def buscar_subtareas_por_etiqueta():
 
     except Exception as e:
         # Manejo de errores generales
-        return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
-
-
-@app.route('/proyecto', methods=['GET'])
-def mostrar_proyecto():
-    try:
-        # Verificar si el objeto proyecto existe (esto es más relevante si hay una lógica más compleja)
-        if not proyecto:
-            return jsonify({"error": "No se ha encontrado el proyecto."}), 404
-
-        return jsonify({"proyecto": repr(proyecto)}), 200
-
-    except Exception as e:
-        # Manejo de cualquier error inesperado
-        return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
-
-
-@app.route('/subtareas', methods=['GET'])
-def obtener_subtareas():
-    try:
-        subtareas = proyecto.tareas
-
-        # Verificar si no hay subtareas
-        if not subtareas:
-            return jsonify({"message": "No hay subtareas en el proyecto."}), 404
-
-        subtareas_respuesta = []
-        for subtarea in subtareas:
-            # Formatear la fecha de vencimiento solo como "YYYY-MM-DD"
-            fecha_vencimiento = subtarea.fecha_vencimiento.strftime('%Y-%m-%d') if subtarea.fecha_vencimiento else None
-
-            # Construir la respuesta con las subtareas
-            subtareas_respuesta.append({
-                "id_tarea": subtarea.id_tarea,
-                "nombre": subtarea.nombre,
-                "fecha_vencimiento": fecha_vencimiento,
-                "prioridad": subtarea.prioridad,
-                "etiquetas": subtarea.etiquetas,
-                "notas": subtarea.notas,
-            })
-
-        return jsonify({"subtareas": subtareas_respuesta}), 200
-
-    except AttributeError as e:
-        return jsonify({"error": "El proyecto no tiene subtareas definidas."}), 500
-    except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
 
