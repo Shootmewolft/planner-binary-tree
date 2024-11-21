@@ -13,7 +13,14 @@ export const useTasksStore = create<Store>()(
       (set) => ({
         tasks: [],
         addTask: async (name: string, description: string): Promise<void> => {
-          axios.post("http://localhost:5000/tasks", {nombre: name, descripcion: description})
+          axios
+            .post("http://localhost:5000/tareas", {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              nombre: name,
+              descripcion: description,
+            })
             .then((res) => {
               return res;
             });

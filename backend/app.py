@@ -9,7 +9,7 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 proyecto = Proyecto(nombre="Shoot") 
 
-@app.route('/tarea', methods=['POST'])
+@app.route('/tarea', methods=['POST, OPTIONS'])
 def agregar_tarea_endpoint():
     try:
         if len(tareas) >= 2:
@@ -33,7 +33,7 @@ def agregar_tarea_endpoint():
     except Exception as e:
         return jsonify({"error": "Ha ocurrido un error interno."}), 500
 
-@app.route('/tareas', methods=['GET'])
+@app.route('/tareas', methods=['GET, OPTIONS'])
 def obtener_tareas():
     try:
         todas_las_tareas = obtener_todas_las_tareas()
@@ -43,7 +43,7 @@ def obtener_tareas():
     except Exception as e:
         return jsonify({"error": "Ha ocurrido un error interno."}), 500
 
-@app.route('/tarea/<int:id_tarea>', methods=['DELETE'])
+@app.route('/tarea/<int:id_tarea>', methods=['DELETE, OPTIONS'])
 def eliminar_tarea_endpoint(id_tarea):
     try:
         # Llamada a la función global para eliminar tarea
@@ -54,7 +54,7 @@ def eliminar_tarea_endpoint(id_tarea):
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
-@app.route('/subtarea', methods=['POST'])
+@app.route('/subtarea', methods=['POST, OPTIONS'])
 def agregar_subtarea():
     try:
         data = request.json
@@ -105,7 +105,7 @@ def agregar_subtarea():
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
     
-@app.route('/subtarea/<int:id_subtarea>', methods=['DELETE'])
+@app.route('/subtarea/<int:id_subtarea>', methods=['DELETE, OPTIONS'])
 def eliminar_subtarea_endpoint(id_subtarea):
     try:
         # Buscar en las tareas principales
@@ -120,7 +120,7 @@ def eliminar_subtarea_endpoint(id_subtarea):
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
-@app.route('/buscar', methods=['POST'])
+@app.route('/buscar', methods=['POST, OPTIONS'])
 def buscar_subtareas_por_etiqueta():
     try:
         data = request.json
