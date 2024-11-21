@@ -1,7 +1,7 @@
 import { Task } from "@/types";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-
+import axios from "axios";
 interface Store {
   tasks: Task[];
   addTask: (name: string, description: string) => Promise<void>;
@@ -13,12 +13,10 @@ export const useTasksStore = create<Store>()(
       (set) => ({
         tasks: [],
         addTask: async (name: string, description: string): Promise<void> => {
-          fetch("http://localhost:5000/tasks", {
-            method: "POST",
-            body: JSON.stringify({ nombre: name, descripion: description }),
-          })
-            .then((res) => res.json())
-            .then((res) => {return res});
+          axios.post("http://localhost:5000/tasks", {nombre: name, descripcion: description})
+            .then((res) => {
+              return res;
+            });
         },
         addSubTask: () => {},
       }),
