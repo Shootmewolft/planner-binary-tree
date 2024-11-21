@@ -60,32 +60,26 @@ def agregar_subtarea():
         if not data:
             return jsonify({"error": "No se ha recibido un cuerpo de solicitud."}), 400
 
-        # Campos obligatorios
         nombre = data.get('nombre')
         prioridad = data.get('prioridad')
-        lado = data.get('lado')  # Nuevo campo para especificar el lado
+        lado = data.get('lado')
 
-        if not nombre or not prioridad:
-            return jsonify({"error": "Los campos 'nombre' y 'prioridad' son obligatorios."}), 400
-
-        if not lado:
-            return jsonify({"error": "El campo 'lado' es obligatorio (izquierdo o derecho)."}), 400
+        if not nombre or not prioridad or not lado:
+            return jsonify({"error": "Los campos 'nombre', 'prioridad' y 'lado' son obligatorios."}), 400
 
         # Validar el valor del lado
         if lado not in ['izquierdo', 'derecho']:
             return jsonify({"error": "El campo 'lado' debe ser 'izquierdo' o 'derecho'."}), 400
 
-        # Seleccionar tarea según el lado
-        if lado == 'izquierdo':
-            if len(tareas) == 0:
-                return jsonify({"error": "No hay tareas principales para asignar subtareas."}), 400
+        # Obtener la tarea principal correspondiente
+        if lado == 'izquierdo' and tareas:
             tarea_principal = tareas[0]
-        elif lado == 'derecho':
-            if len(tareas) < 2:
-                return jsonify({"error": "No hay suficientes tareas principales para asignar al lado derecho."}), 400
+        elif lado == 'derecho' and len(tareas) > 1:
             tarea_principal = tareas[1]
+        else:
+            return jsonify({"error": "No hay suficientes tareas principales."}), 400
 
-        # Validación opcional de fecha de vencimiento
+        # Validar y procesar la fecha de vencimiento
         fecha_vencimiento = data.get('fecha_vencimiento')
         if fecha_vencimiento:
             try:
@@ -103,12 +97,13 @@ def agregar_subtarea():
         )
 
         # Agregar la subtarea al lado correspondiente
-        tarea_principal.agregar_subtarea(subtarea.nombre, subtarea.notas, lado=lado)
+        tarea_principal.agregar_subtarea(subtarea, lado)
 
         return jsonify({"message": "Subtarea agregada con éxito", "id_tarea": subtarea.id_tarea}), 201
 
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
+
     
 @app.route('/subtarea/<int:id_subtarea>', methods=['DELETE'])
 def eliminar_subtarea_endpoint(id_subtarea):
@@ -131,27 +126,19 @@ def eliminar_subtarea_endpoint(id_subtarea):
 def buscar_subtareas_por_etiqueta():
     try:
         data = request.json
-        
-        # Verificar que el JSON es válido
-        if not data:
-            return jsonify({"error": "El cuerpo de la solicitud debe ser un JSON válido."}), 400
-        
-        etiqueta = data.get('etiqueta')
 
-        if not etiqueta:
+        if not data or 'etiqueta' not in data:
             return jsonify({"error": "Se debe proporcionar una etiqueta"}), 400
 
-        # Buscar las subtareas por etiqueta
-        subtareas = proyecto.buscar_subtareas_por_etiqueta(etiqueta)
+        etiqueta = data['etiqueta']
+        resultados = proyecto.buscar_subtareas_por_etiqueta(etiqueta)
 
-        # Si no se encuentran subtareas
-        if not subtareas:
+        if not resultados:
             return jsonify({"message": "No se encontraron subtareas con esa etiqueta"}), 404
 
-        return jsonify({"subtareas": subtareas}), 200
+        return jsonify({"subtareas": resultados}), 200
 
     except Exception as e:
-        # Manejo de errores generales
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
 

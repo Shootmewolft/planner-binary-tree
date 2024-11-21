@@ -12,19 +12,18 @@ class Tarea:
         self.subtareas_izquierda = []  # Lista de subtareas del lado izquierdo
         self.subtareas_derecha = []  # Lista de subtareas del lado derecho
 
-    def agregar_subtarea(self, nombre, descripcion, lado):
+    def agregar_subtarea(self, subtarea, lado):
         """
         Agrega una subtarea a la tarea actual según el lado especificado.
         """
         if lado not in ["izquierdo", "derecho"]:
             raise ValueError("El lado debe ser 'izquierdo' o 'derecho'.")
 
-        subtarea = Tarea(nombre, descripcion)
-
         if lado == "izquierdo":
             self.subtareas_izquierda.append(subtarea)
         else:  # lado == "derecho"
             self.subtareas_derecha.append(subtarea)
+
 
     def eliminar_subtarea(self, id_subtarea):
         """
@@ -115,6 +114,18 @@ class SubTarea:
         self.notas = notas
         self.subtareas_izquierda = None
         self.subtareas_derecha = None
+    def to_dict(self):
+        return {
+            "id_tarea": self.id_tarea,
+            "nombre": self.nombre,
+            "fecha_vencimiento": self.fecha_vencimiento.isoformat() if self.fecha_vencimiento else None,
+            "prioridad": self.prioridad,
+            "etiquetas": self.etiquetas,
+            "notas": self.notas,
+            "subtareas_izquierda": self.subtareas_izquierda.to_dict() if self.subtareas_izquierda else [],
+            "subtareas_derecha": self.subtareas_derecha.to_dict() if self.subtareas_derecha else []
+        }
+
 
     def agregar_subtarea(self, subtarea, lado):
         if lado == "izquierdo":
@@ -261,12 +272,21 @@ class Proyecto(SubTarea):
 
     def buscar_subtareas_por_etiqueta(self, etiqueta):
         """
-        Busca subtareas dentro del proyecto por etiqueta.
+        Busca subtareas dentro del proyecto por etiqueta (recursivamente).
         """
         resultados = []
-        for subtarea in self.tareas:
-            subtarea.buscar_subtareas_por_etiqueta(etiqueta, resultados)
+        for tarea in self.tareas:
+            # Buscar en las subtareas del lado izquierdo
+            for subtarea in tarea.subtareas_izquierda:
+                resultados.extend(subtarea.buscar_subtareas_por_etiqueta(etiqueta))
+            
+            # Buscar en las subtareas del lado derecho
+            for subtarea in tarea.subtareas_derecha:
+                resultados.extend(subtarea.buscar_subtareas_por_etiqueta(etiqueta))
         return resultados
+    
+    
+
 
     def mostrar_arbol_completo(self):
         """
