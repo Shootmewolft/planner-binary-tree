@@ -1,11 +1,18 @@
+import { useTasksStore } from "@/store";
 import { Button } from "../ui/button";
 
 export function ListTasks() {
+  const { addTask } = useTasksStore();
+  const handleClick = () => {
+    const response = addTask("Task 1", "Description of Task 1");
+    const response2 = addTask("Task 2", "Description of Task 2");
+    console.log({ response, response2 });
+  };
   return (
     <div className="bg-gray-main h-[89%] mx-4 rounded-md p-4 flex flex-col gap-4 border border-border">
       <header className="flex justify-between items-center">
         <h3 className="text-lg font-bold">Tareas</h3>
-        <Button variant="outline" className="rounded-md">
+        <Button variant="outline" className="rounded-md" onClick={handleClick}>
           Crear Tarea
         </Button>
       </header>

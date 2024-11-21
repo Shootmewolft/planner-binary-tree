@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from models import Proyecto, SubTarea, agregar_tarea, tareas, obtener_todas_las_tareas, eliminar_tarea
 from datetime import datetime
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 proyecto = Proyecto(nombre="Shoot") 
 

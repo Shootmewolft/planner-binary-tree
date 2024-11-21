@@ -3,7 +3,6 @@ import { toast } from "sonner";
 
 export function Form() {
   const { setLabel } = useLabelContext();
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fields = Object.fromEntries(new FormData(e.currentTarget));
