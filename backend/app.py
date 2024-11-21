@@ -51,8 +51,6 @@ def eliminar_tarea_endpoint(id_tarea):
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
-
-
 @app.route('/subtarea', methods=['POST'])
 def agregar_subtarea():
     try:
@@ -103,7 +101,6 @@ def agregar_subtarea():
 
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
-
     
 @app.route('/subtarea/<int:id_subtarea>', methods=['DELETE'])
 def eliminar_subtarea_endpoint(id_subtarea):
@@ -119,8 +116,6 @@ def eliminar_subtarea_endpoint(id_subtarea):
 
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
-
-
 
 @app.route('/buscar', methods=['POST'])
 def buscar_subtareas_por_etiqueta():
@@ -140,7 +135,6 @@ def buscar_subtareas_por_etiqueta():
 
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
-
 
 if __name__ == '__main__':
     app.run(debug=True)
