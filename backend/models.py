@@ -149,28 +149,19 @@ class SubTarea:
                 self.subtareas_izquierda.eliminar_subtarea(id_tarea)
             if self.subtareas_derecha:
                 self.subtareas_derecha.eliminar_subtarea(id_tarea)
+    @staticmethod
+    def buscar_por_etiqueta(etiqueta, tareas):
+        """
+        Busca todas las subtareas que contienen una etiqueta específica dentro de las tareas.
+        """
+        subtareas_encontradas = []
+        for tarea in tareas:
+            # Buscar en las subtareas del lado izquierdo
+            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_izquierda if etiqueta in subtarea.etiquetas]
+            # Buscar en las subtareas del lado derecho
+            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_derecha if etiqueta in subtarea.etiquetas]
 
-
-    def buscar_subtareas_por_etiqueta(self, etiqueta, resultados=None):
-        if resultados is None:
-            resultados = []
-
-        if etiqueta in self.etiquetas:
-            resultados.append({
-                "id_tarea": self.id_tarea,
-                "nombre": self.nombre,
-                "fecha_vencimiento": self.fecha_vencimiento,
-                "prioridad": self.prioridad,
-                "etiquetas": self.etiquetas,
-                "notas": self.notas
-            })
-
-        if self.subtareas_izquierda:
-            self.subtareas_izquierda.buscar_subtareas_por_etiqueta(etiqueta, resultados)
-        if self.subtareas_derecha:
-            self.subtareas_derecha.buscar_subtareas_por_etiqueta(etiqueta, resultados)
-
-        return resultados
+        return subtareas_encontradas
     
     def mostrar_arbol(self, nivel=0):
         """
@@ -269,22 +260,6 @@ class Proyecto(SubTarea):
         """
         self.tareas.clear()  # Elimina todas las subtareas del proyecto
         return "Todas las subtareas han sido eliminadas."
-
-    def buscar_subtareas_por_etiqueta(self, etiqueta):
-        """
-        Busca subtareas dentro del proyecto por etiqueta (recursivamente).
-        """
-        resultados = []
-        for tarea in self.tareas:
-            # Buscar en las subtareas del lado izquierdo
-            for subtarea in tarea.subtareas_izquierda:
-                resultados.extend(subtarea.buscar_subtareas_por_etiqueta(etiqueta))
-            
-            # Buscar en las subtareas del lado derecho
-            for subtarea in tarea.subtareas_derecha:
-                resultados.extend(subtarea.buscar_subtareas_por_etiqueta(etiqueta))
-        return resultados
-    
     
 
 
