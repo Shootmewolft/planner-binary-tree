@@ -1,31 +1,33 @@
 import { Task } from "@/types";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-
-interface Store{
-    tasks: Task[];
-    addTask: (task: string) => void;
+import axios from "axios";
+interface Store {
+  tasks: Task[];
+  addTask: (name: string, description: string) => Promise<void>;
 }
 
 export const useTasksStore = create<Store>()(
   devtools(
     persist(
-       (set, get) => {
-        return {
-          questions: [],
-          currentQuestion: 1,
-          fetchQuestions: async (limit: number) => {
-            const res = await fetch("http://localhost:5173");
-            const json = await res.json();
-
-            const questions = json
-              .sort(() => Math.random() - 0.5)
-              .slice(0, limit);
-            set({ questions });
-          },
-        };
-      },
-      { name: "questions" }
+      (set) => ({
+        tasks: [],
+        addTask: async (name: string, description: string): Promise<void> => {
+          axios
+            .post("http://localhost:5000/tareas", {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              nombre: name,
+              descripcion: description,
+            })
+            .then((res) => {
+              return res;
+            });
+        },
+        addSubTask: () => {},
+      }),
+      { name: "tasks" }
     )
   )
 );
