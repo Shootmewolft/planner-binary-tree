@@ -144,19 +144,6 @@ class SubTarea:
                 self.subtareas_izquierda.eliminar_subtarea(id_tarea)
             if self.subtareas_derecha:
                 self.subtareas_derecha.eliminar_subtarea(id_tarea)
-    @staticmethod
-    def buscar_por_etiqueta(etiqueta, tareas):
-        """
-        Busca todas las subtareas que contienen una etiqueta específica dentro de las tareas.
-        """
-        subtareas_encontradas = []
-        for tarea in tareas:
-            # Buscar en las subtareas del lado izquierdo
-            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_izquierda if etiqueta in subtarea.etiquetas]
-            # Buscar en las subtareas del lado derecho
-            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_derecha if etiqueta in subtarea.etiquetas]
-
-        return subtareas_encontradas
     
     def mostrar_arbol(self, nivel=0):
         """
@@ -183,19 +170,7 @@ class SubTarea:
 
         return subtareas_encontradas
     
-    @staticmethod
-    def buscar_por_etiqueta(etiqueta, tareas):
-        """
-        Busca todas las subtareas que contienen una etiqueta específica dentro de las tareas.
-        """
-        subtareas_encontradas = []
-        for tarea in tareas:
-            # Buscar en las subtareas del lado izquierdo
-            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_izquierda if etiqueta in subtarea.etiquetas]
-            # Buscar en las subtareas del lado derecho
-            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_derecha if etiqueta in subtarea.etiquetas]
 
-        return subtareas_encontradas
 
 class Proyecto(SubTarea):
     def __init__(self, nombre):
