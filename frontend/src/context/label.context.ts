@@ -12,7 +12,7 @@ export const LabelContext = createContext<LabelContextType<string>>({
 
 export const useLabelContext = () => {
   const context = useContext(LabelContext)
-  if (!context) {
+  if (!context || context.label === null) {
     throw new Error("useLabelContext must be used within a LabelProvider")
   }
   return context

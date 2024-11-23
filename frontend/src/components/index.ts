@@ -6,3 +6,17 @@ export * from "./Footer";
 export * from "./Board/Board";
 export * from "./Board/HeaderBoard";
 export * from "./Board/Form";
+export * from "./Board/Tasks";
+export * from "./Board/DialogTask";
+export * from "./Skeleton"
+export * from "./ui/button";
+export * from "./ui/dialog";
+export * from "./ui/input";
+export * from "./ui/label";
+export * from "./Board/DialogSubTask";
+export * from "./Board/SelectTask";
+export * from "./InputDialog";
+export * from "./ui/textarea";
+export * from "./ui/popover";
+export * from "./ui/calendar";
+export * from "./ui/label";

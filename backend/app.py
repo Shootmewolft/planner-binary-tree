@@ -9,7 +9,7 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 proyecto = Proyecto(nombre="Shoot") 
 
-@app.route('/tarea', methods=['POST, OPTIONS'])
+@app.route('/tarea', methods=['POST'])
 def agregar_tarea_endpoint():
     try:
         if len(tareas) >= 2:
@@ -33,7 +33,7 @@ def agregar_tarea_endpoint():
     except Exception as e:
         return jsonify({"error": "Ha ocurrido un error interno."}), 500
 
-@app.route('/tareas', methods=['GET, OPTIONS'])
+@app.route('/tareas', methods=['GET'])
 def obtener_tareas():
     try:
         todas_las_tareas = obtener_todas_las_tareas()
@@ -43,7 +43,7 @@ def obtener_tareas():
     except Exception as e:
         return jsonify({"error": "Ha ocurrido un error interno."}), 500
 
-@app.route('/tarea/<int:id_tarea>', methods=['DELETE, OPTIONS'])
+@app.route('/tarea/<int:id_tarea>', methods=['DELETE'])
 def eliminar_tarea_endpoint(id_tarea):
     try:
         # Llamada a la función global para eliminar tarea
@@ -54,7 +54,7 @@ def eliminar_tarea_endpoint(id_tarea):
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
-@app.route('/subtarea', methods=['POST, OPTIONS'])
+@app.route('/subtarea', methods=['POST'])
 def agregar_subtarea():
     try:
         data = request.json
@@ -105,7 +105,7 @@ def agregar_subtarea():
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
     
-@app.route('/subtarea/<int:id_subtarea>', methods=['DELETE, OPTIONS'])
+@app.route('/subtarea/<int:id_subtarea>', methods=['DELETE'])
 def eliminar_subtarea_endpoint(id_subtarea):
     try:
         # Buscar en las tareas principales
@@ -120,24 +120,22 @@ def eliminar_subtarea_endpoint(id_subtarea):
     except Exception as e:
         return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
 
-@app.route('/buscar', methods=['POST, OPTIONS'])
-def buscar_subtareas_por_etiqueta():
-    try:
-        data = request.json
+@app.route('/buscar_subtareas', methods=['GET'])
+def buscar_subtareas():
+    """
+    Endpoint para buscar subtareas por etiqueta.
+    """
+    etiqueta = request.args.get('etiqueta')
+    if not etiqueta:
+        return jsonify({"error": "Falta el parámetro 'etiqueta'"}), 400
 
-        if not data or 'etiqueta' not in data:
-            return jsonify({"error": "Se debe proporcionar una etiqueta"}), 400
+    # Filtramos las subtareas dentro de las tareas que contienen la etiqueta proporcionada
+    subtareas_encontradas = SubTarea.buscar_por_etiqueta(etiqueta, tareas)
 
-        etiqueta = data['etiqueta']
-        resultados = proyecto.buscar_subtareas_por_etiqueta(etiqueta)
-
-        if not resultados:
-            return jsonify({"message": "No se encontraron subtareas con esa etiqueta"}), 404
-
-        return jsonify({"subtareas": resultados}), 200
-
-    except Exception as e:
-        return jsonify({"error": f"Ha ocurrido un error inesperado: {str(e)}"}), 500
+    if subtareas_encontradas:
+        return jsonify([subtarea.to_dict() for subtarea in subtareas_encontradas]), 200
+    else:
+        return jsonify({"message": "No se encontraron subtareas con esa etiqueta."}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

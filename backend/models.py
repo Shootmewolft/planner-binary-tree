@@ -1,7 +1,5 @@
 from datetime import datetime
 
-
-
 class Tarea:
     __id__counter = 1
     def __init__(self, nombre, descripcion):
@@ -23,7 +21,6 @@ class Tarea:
             self.subtareas_izquierda.append(subtarea)
         else:  # lado == "derecho"
             self.subtareas_derecha.append(subtarea)
-
 
     def eliminar_subtarea(self, id_subtarea):
         """
@@ -85,12 +82,9 @@ def eliminar_tarea(id_tarea):
             return mensaje
     return f"No se encontró una tarea con ID {id_tarea}."
 
-
 def obtener_todas_las_tareas():
     """Devuelve una lista de todas las tareas y sus subtareas."""
     return [tarea.to_dict() for tarea in tareas]
-
-
 
 class SubTarea:
     _id_counter = 1  # Contador estático para generar IDs únicos
@@ -114,6 +108,7 @@ class SubTarea:
         self.notas = notas
         self.subtareas_izquierda = None
         self.subtareas_derecha = None
+    
     def to_dict(self):
         return {
             "id_tarea": self.id_tarea,
@@ -125,7 +120,6 @@ class SubTarea:
             "subtareas_izquierda": self.subtareas_izquierda.to_dict() if self.subtareas_izquierda else [],
             "subtareas_derecha": self.subtareas_derecha.to_dict() if self.subtareas_derecha else []
         }
-
 
     def agregar_subtarea(self, subtarea, lado):
         if lado == "izquierdo":
@@ -173,7 +167,20 @@ class SubTarea:
             self.subtareas_izquierda.mostrar_arbol(nivel + 1)
         if self.subtareas_derecha:
             self.subtareas_derecha.mostrar_arbol(nivel + 1)
+    
+    @staticmethod
+    def buscar_por_etiqueta(etiqueta, tareas):
+        """
+        Busca todas las subtareas que contienen una etiqueta específica dentro de las tareas.
+        """
+        subtareas_encontradas = []
+        for tarea in tareas:
+            # Buscar en las subtareas del lado izquierdo
+            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_izquierda if etiqueta in subtarea.etiquetas]
+            # Buscar en las subtareas del lado derecho
+            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_derecha if etiqueta in subtarea.etiquetas]
 
+        return subtareas_encontradas
 
 class Proyecto(SubTarea):
     def __init__(self, nombre):
@@ -231,8 +238,6 @@ class Proyecto(SubTarea):
         # Eliminar la tarea principal
         self.tareas.remove(tarea_a_eliminar)
         return f"Tarea con ID {id_tarea} y todas sus subtareas han sido eliminadas."
-        
-
 
     def eliminar_subtarea(id_tarea):
         """Elimina una subtarea de cualquier tarea a la que pertenezca."""
@@ -250,9 +255,6 @@ class Proyecto(SubTarea):
                     return f"Subtarea con ID {id_tarea} eliminada exitosamente."
     
         return f"No se encontró una subtarea con ID {id_tarea}."
-    
-
-
     
     def eliminar_todas_subtareas(self):
         """

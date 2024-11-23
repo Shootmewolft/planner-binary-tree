@@ -21,6 +21,7 @@ export const useFetch = <T>(url: string): Props<T> => {
       try {
         const response = await fetch(url, controller);
         if (!response.ok) {
+          setData(null);
           throw new Error("Error fetching data");
         }
         const data = await response.json();
@@ -31,7 +32,6 @@ export const useFetch = <T>(url: string): Props<T> => {
         setLoading(false);
       }
     };
-
     fetchData();
 
     return () => {
