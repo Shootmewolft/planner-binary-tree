@@ -1,3 +1,4 @@
+import { Subtask, Tasks } from "@/types";
 import { useEffect, useState } from "react";
 
 type DataType<T> = T | null;
@@ -9,7 +10,11 @@ interface Props<T> {
   loading: boolean;
 }
 
-export const useFetch = <T>(url: string): Props<T> => {
+export const useFetch = <T>(
+  url: string,
+  tasks: Tasks,
+  subtasks: { oneTask: Subtask[]; twoTask: Subtask[] }
+): Props<T> => {
   const [data, setData] = useState<DataType<T>>(null);
   const [error, setError] = useState<ErrorType>(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +42,7 @@ export const useFetch = <T>(url: string): Props<T> => {
     return () => {
       controller.abort();
     };
-  }, [url]);
+  }, [url, tasks, subtasks]);
 
   return { data, loading, error };
 };

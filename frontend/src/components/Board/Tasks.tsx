@@ -14,10 +14,11 @@ export function Tasks({ tasks }: Props) {
   const { removeTask } = useTasksStore();
   const { subtasks, removeSubTask } = useSubtasksStore();
 
-  const handleDelete = (id: number, index: number) => {
-    subtasks[index !== 0 ? "oneTask" : "twoTask"].map((subtask) => (
-      removeSubTask(subtask.id_tarea)
-    ))
+  const handleDelete = (id: number) => {
+    const taskSubtasks = subtasks.oneTask
+      .concat(subtasks.twoTask)
+      .filter((subtask) => subtask.id_tarea_padre === id);
+    taskSubtasks.forEach((subtask) => removeSubTask(subtask.id_tarea));
     removeTask(id);
     fetching(HTTP_METHODS.DELETE, `/tarea/${id}`);
     toast.success("Tarea eliminada exitosamente");
@@ -31,7 +32,7 @@ export function Tasks({ tasks }: Props) {
 
   return (
     <ul className="flex flex-col gap-4">
-      {tasks.map((task, index) => (
+      {tasks.map((task) => (
         <li
           key={task.id_tarea}
           className="flex flex-col justify-between px-4 py-2 bg-border rounded-xl gap-4"
@@ -48,34 +49,37 @@ export function Tasks({ tasks }: Props) {
               <Button
                 type="button"
                 variant="destructive"
-                onClick={() => handleDelete(task.id_tarea, index)}
-                className="bg-red-500 rounded-xl "
+                onClick={() => handleDelete(task.id_tarea)}
+                className="bg-red-500 rounded-xl"
               >
                 Borrar
               </Button>
             </div>
           </div>
           <ul className="flex flex-col gap-2">
-            {subtasks[index !== 0 ? "oneTask" : "twoTask"]?.map((subtask) => (
-              <SubTask
-                key={subtask.id_tarea}
-                isSidebar
-                date={subtask.fecha_vencimiento}
-                labels={subtask.etiquetas}
-                name={subtask.nombre}
-                notes={subtask.notas}
-                priority={subtask.prioridad}
-              >
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => handleDeleteSubtask(subtask.id_tarea)}
-                  className="bg-red-500 rounded-xl"
+            {subtasks.oneTask
+              .concat(subtasks.twoTask)
+              .filter((subtask) => subtask.id_tarea_padre === task.id_tarea)
+              .map((subtask) => (
+                <SubTask
+                  key={subtask.id_tarea}
+                  isSidebar
+                  date={subtask.fecha_vencimiento}
+                  labels={subtask.etiquetas}
+                  name={subtask.nombre}
+                  notes={subtask.notas}
+                  priority={subtask.prioridad}
                 >
-                  Borrar
-                </Button>
-              </SubTask>
-            ))}
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => handleDeleteSubtask(subtask.id_tarea)}
+                    className="bg-red-500 rounded-xl"
+                  >
+                    Borrar
+                  </Button>
+                </SubTask>
+              ))}
           </ul>
         </li>
       ))}

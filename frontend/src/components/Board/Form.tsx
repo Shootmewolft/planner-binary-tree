@@ -4,12 +4,19 @@ import { DialogSearch } from "./DialogSearch";
 import { useState } from "react";
 import { useFetch } from "@/hooks";
 import { Subtask } from "@/types";
+import { useSubtasksStore, useTasksStore } from "@/store";
 
 export function Form() {
   const { label, setLabel } = useLabelContext();
+  const { subtasks } = useSubtasksStore();
+  const { tasks: tasksStore } = useTasksStore();
   const [openModal, setOpenModal] = useState(false);
-  const { data: tasks, error, loading } = useFetch<Subtask[]>(
-    `${import.meta.env.VITE_API_URL}/buscar_subtareas?etiqueta=${label}`
+  const {
+    data: tasks,
+    error,
+    loading,
+  } = useFetch<Subtask[]>(
+    `${import.meta.env.VITE_API_URL}/buscar_subtareas?etiqueta=${label}`, tasksStore, subtasks
   );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

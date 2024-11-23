@@ -38,7 +38,7 @@ interface Props {
 
 export function DialogSubTask({ children, idTask }: Props) {
   const { tasks } = useTasksStore();
-  const { addSubTask, subtasks } = useSubtasksStore();
+  const { addSubTask } = useSubtasksStore();
   const inputName = useRef<HTMLInputElement>(null);
   const labelInput = useRef<HTMLInputElement>(null);
   const notesInput = useRef<HTMLTextAreaElement>(null);
@@ -94,6 +94,7 @@ export function DialogSubTask({ children, idTask }: Props) {
         id_tarea: response.id_tarea,
         subtareas_derecha: [],
         subtareas_izquierda: [],
+        id_tarea_padre: idTask,
       },
       side.current!
     );

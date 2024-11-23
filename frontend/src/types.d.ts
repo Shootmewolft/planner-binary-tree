@@ -19,6 +19,7 @@ export interface Subtask {
   prioridad: string;
   subtareas_derecha: Task[];
   subtareas_izquierda: Task[];
+  id_tarea_padre: number;
 }
 
 export interface responseBodyTask {
