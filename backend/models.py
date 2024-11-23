@@ -1,10 +1,17 @@
 from datetime import datetime
+class IDGenerator:
+    _current_id = 1
+
+    @classmethod
+    def next_id(cls):
+        id_generado = cls._current_id
+        cls._current_id += 1
+        return id_generado
+
 
 class Tarea:
-    __id__counter = 1
     def __init__(self, nombre, descripcion):
-        self.id_tarea = Tarea.__id__counter
-        Tarea.__id__counter += 1
+        self.id_tarea = IDGenerator.next_id() 
         self.nombre = nombre
         self.descripcion = descripcion
         self.subtareas_izquierda = []  # Lista de subtareas del lado izquierdo
@@ -102,15 +109,7 @@ class SubTarea:
     _id_usados = set()  # Conjunto de IDs ya utilizados
 
     def __init__(self, nombre, fecha_vencimiento, prioridad, etiquetas=None, notas="", id_tarea=None):
-        if id_tarea is None:
-            self.id_tarea = SubTarea._id_counter
-            SubTarea._id_counter += 1  # Incrementar el contador para el siguiente id
-        else:
-            if id_tarea in SubTarea._id_usados:
-                raise ValueError(f"El ID {id_tarea} ya está en uso.")
-            self.id_tarea = id_tarea
-            SubTarea._id_usados.add(id_tarea)  # Agregar el ID al conjunto de IDs utilizados
-        
+        self.id_tarea = IDGenerator.next_id() 
         # Resto de los atributos de la subtarea
         self.nombre = nombre
         self.fecha_vencimiento = fecha_vencimiento
