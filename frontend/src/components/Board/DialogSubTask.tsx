@@ -68,7 +68,7 @@ export function DialogSubTask({ children, idTask }: Props) {
       prioridad: valueSelect,
       lado: side.current!,
       fecha_vencimiento: formatDateToYMD(date),
-      etiquetas: label.split(","),
+      etiquetas: label.split(", "),
       notas: notes,
     };
 
