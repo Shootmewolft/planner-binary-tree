@@ -109,6 +109,7 @@ class SubTarea:
         self.subtareas_izquierda = None
         self.subtareas_derecha = None
     
+    
     def to_dict(self):
         return {
             "id_tarea": self.id_tarea,
@@ -167,6 +168,20 @@ class SubTarea:
             self.subtareas_izquierda.mostrar_arbol(nivel + 1)
         if self.subtareas_derecha:
             self.subtareas_derecha.mostrar_arbol(nivel + 1)
+    
+    @staticmethod
+    def buscar_por_etiqueta(etiqueta, tareas):
+        """
+        Busca todas las subtareas que contienen una etiqueta específica dentro de las tareas.
+        """
+        subtareas_encontradas = []
+        for tarea in tareas:
+            # Buscar en las subtareas del lado izquierdo
+            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_izquierda if etiqueta in subtarea.etiquetas]
+            # Buscar en las subtareas del lado derecho
+            subtareas_encontradas += [subtarea for subtarea in tarea.subtareas_derecha if etiqueta in subtarea.etiquetas]
+
+        return subtareas_encontradas
     
     @staticmethod
     def buscar_por_etiqueta(etiqueta, tareas):
