@@ -48,3 +48,4 @@ export interface responseSubtask{
 export interface responseBodySearchTask {
   etiqueta: string
 }
+
