@@ -250,7 +250,7 @@ class Proyecto(SubTarea):
         """
         Elimina todas las subtareas del proyecto.
         """
-        self.tareas.clear()  # Elimina todas las subtareas del proyecto
+        self.tareas.clear()  ## Elimina todas las subtareas del proyecto
         return "Todas las subtareas han sido eliminadas."
     
 
