@@ -26,11 +26,22 @@ class Tarea:
         """
         Elimina una subtarea de la tarea si el id coincide.
         """
-        # Eliminar de la lista de subtareas del lado izquierdo
-        self.subtareas_izquierda = [subtarea for subtarea in self.subtareas_izquierda if subtarea.id_tarea != id_subtarea]
-        # Eliminar de la lista de subtareas del lado derecho
-        self.subtareas_derecha = [subtarea for subtarea in self.subtareas_derecha if subtarea.id_tarea != id_subtarea]
-        return f"Subtarea con ID {id_subtarea} eliminada exitosamente."
+        # Verificar si la subtarea está en el lado izquierdo
+        for subtarea in self.subtareas_izquierda:
+            if subtarea.id_tarea == id_subtarea:
+                self.subtareas_izquierda.remove(subtarea)
+                return f"Subtarea con ID {id_subtarea} eliminada exitosamente."
+    
+        # Verificar si la subtarea está en el lado derecho
+        for subtarea in self.subtareas_derecha:
+            if subtarea.id_tarea == id_subtarea:
+                self.subtareas_derecha.remove(subtarea)
+                return f"Subtarea con ID {id_subtarea} eliminada exitosamente."
+    
+        # Si no se encontró la subtarea
+        return f"No se encontró una subtarea con ID {id_subtarea}."
+    
+
 
     def eliminar_tarea(self, id_tarea):
         """
