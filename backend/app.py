@@ -129,7 +129,7 @@ def buscar_subtareas():
     if not etiqueta:
         return jsonify({"error": "Falta el parámetro 'etiqueta'"}), 400
 
-    # Filtramos las subtareas dentro de las tareas que contienen la etiqueta proporcionada
+    ## Filtramos las subtareas dentro de las tareas que contienen la etiqueta proporcionada
     subtareas_encontradas = SubTarea.buscar_por_etiqueta(etiqueta, tareas)
 
     if subtareas_encontradas:
