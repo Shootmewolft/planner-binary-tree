@@ -1,0 +1,12 @@
+.footer {
+  animation: line 12s backwards infinite alternate;
+}
+
+@keyframes line {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: 75%;
+  }
+}
